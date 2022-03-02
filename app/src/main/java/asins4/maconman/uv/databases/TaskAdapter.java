@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
     private Cursor items;
+    View.OnClickListener mOnItemClickListener;
 
     public Cursor getCursor(){
             return items;
@@ -20,15 +21,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
     public void setCursor(Cursor newCursor){
             items = newCursor;
             notifyDataSetChanged();
+    }
 
-            }
 
+    public void setOnItemClickListener(View.OnClickListener itemClickListener) {
+        mOnItemClickListener = itemClickListener;
+    }
 
     @NonNull
     @Override
     public TaskAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_main, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_main, parent, false);
+        v.setOnClickListener(mOnItemClickListener);
         return new ViewHolder(v);
     }
 
@@ -36,9 +40,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
     public void onBindViewHolder(@NonNull TaskAdapter.ViewHolder holder, int position) {
         items.moveToPosition(position);
         int id_name = items.getColumnIndex(TasksContract.TasksEntry.COLUMN_NAME_NAME);
-
         String name = items.getString(id_name);
-
         holder.textViewName.setText(name);
     }
 
@@ -47,17 +49,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder>{
         return (items != null) ? items.getCount() : 0;
     }
 
-
     public class ViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
         // Referencias UI
         public TextView textViewName;
-//        public CheckBox checkBox;
 
         public ViewHolder(View v) {
             super(v);
+            v.setTag(this);
             textViewName = (TextView) v.findViewById(R.id.textViewName);
-//            checkBox = (CheckBox) v.findViewById(R.id.checkBox);
         }
 
         @Override

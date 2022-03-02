@@ -4,10 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.util.Log;
+import android.view.View;
 
 public class VistaActivity extends AppCompatActivity {
 
@@ -45,5 +49,34 @@ public class VistaActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.reciclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(taskAdapter);
+
+        View.OnClickListener onItemClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // This viewHolder will have all required values.
+                RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) view.getTag();
+                int posicion = viewHolder.getAdapterPosition();
+                //muevo el cursor a la tarea que quiero marcar como hecha
+                //este cursor sale de arriba de cuando cojo los datos a mostrar
+                cursor.moveToPosition(posicion);
+                //recojo el indice de dicha tarea
+                int index = cursor.getColumnIndex(TasksContract.TasksEntry._ID);
+                int id = cursor.getInt(index);
+
+                //update db
+                ContentValues values = new ContentValues();
+                //lo que voy a cambiar
+                values.put(TasksContract.TasksEntry.COLUMN_NAME_DONE, 1);
+                // la clausula where
+                String selection = TasksContract.TasksEntry._ID + " = ?";
+                String[] selectionArgs = { String.valueOf(id) };
+                db.update(TasksContract.TasksEntry.TABLE_NAME, values, selection, selectionArgs);
+                // Implement the listener!
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
+            }
+        };
+
+        taskAdapter.setOnItemClickListener(onItemClickListener);
     }
 }
